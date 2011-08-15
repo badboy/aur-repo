@@ -28,3 +28,15 @@ task :pages => :man do
        ", :verbose => false
   }
 end
+
+desc 'Install aur-repo and man pages'
+task :install => :man do
+  prefix = ENV['PREFIX'] || '/usr/local'
+
+  man_dir = File.join(prefix, 'man', 'man1')
+  bin_dir = File.join(prefix, 'bin')
+
+  cp './aur-repo', bin_dir
+  chmod 0755, File.join(bin_dir, 'aur-repo')
+  cp './man/aur-repo.1', man_dir
+end
