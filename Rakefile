@@ -36,6 +36,8 @@ task :install => :man do
   man_dir = File.join(prefix, 'man', 'man1')
   bin_dir = File.join(prefix, 'bin')
 
+  mkdir_p bin_dir
+  mkdir_p man_dir
   cp './aur-repo', bin_dir
   chmod 0755, File.join(bin_dir, 'aur-repo')
   cp './man/aur-repo.1', man_dir
