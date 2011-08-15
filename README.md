@@ -7,7 +7,7 @@ set of packages from the AUR and keep them up to date in the local repo.
 ## Usage
 
 ```
-Usage: aur-repo [-hnqv] [command] [options]
+Usage: aur-repo [-hnqv] [command]
 
   -h : Show this help and exit.
   -n : Dry run. Show executed commands but don't run them.

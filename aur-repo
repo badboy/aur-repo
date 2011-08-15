@@ -4,7 +4,7 @@
 # Author  : Jan-Erik Rediger (badboy_) <badboy at archlinux dot us>
 # URL     : https://github.com/badboy/aur-repo/tree/ctdo
 #
-#        Based on work by Thorsten Toepper, who initially create aur-repo.
+#        Based on work by Thorsten Toepper, who initially created aur-repo.
 #        Thorsten's version was inspired and partly based on work by
 #        Stefan Husmann and Michal Krenek
 VERSION=1.0.0
@@ -166,7 +166,7 @@ get_data() {
 
 show_help() {
 cat << EOF
-Usage: $(basename ${0}) [-hnqv] [command] [options]
+Usage: $(basename ${0}) [-hnqv] [command]
 
   -h : Show this help and exit.
   -n : Dry run. Show executed commands but don't run them.
