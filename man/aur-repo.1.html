@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>aur-repo(1) - keep your local repository up to date.</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+  <style type='text/css' media='all'>
+  /* style: toc */
+  .man-navigation {display:block !important;position:fixed;top:0;left:113ex;height:100%;width:100%;padding:48px 0 0 0;border-left:1px solid #dbdbdb;background:#eee}
+  .man-navigation a,.man-navigation a:hover,.man-navigation a:link,.man-navigation a:visited {display:block;margin:0;padding:5px 2px 5px 30px;color:#999;text-decoration:none}
+  .man-navigation a:hover {color:#111;text-decoration:underline}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTIONS">DESCRIPTIONS</a>
+    <a href="#OPTIONS">OPTIONS</a>
+    <a href="#COMMANDS">COMMANDS</a>
+    <a href="#FOLDER-STRUCTURE">FOLDER STRUCTURE</a>
+    <a href="#CONFIGURATION-FILE">CONFIGURATION FILE</a>
+    <a href="#BUGS">BUGS</a>
+    <a href="#COPYRIGHT">COPYRIGHT</a>
+    <a href="#SEE-ALSO">SEE ALSO</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>aur-repo(1)</li>
+    <li class='tc'>aur-repo Manual</li>
+    <li class='tr'>aur-repo(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>aur-repo</code> - <span class="man-whatis">keep your local repository up to date.</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><code>aur-repo</code> [-hnqv] [command]</p>
+
+<h2 id="DESCRIPTIONS">DESCRIPTIONS</h2>
+
+<p><code>aur-repo</code> provides an easy way to keep a custom repository filled with AUR packages up to date.
+ All you need to do is to specifiy the packages in a simple text file and let <code>aur-repo</code> do its work.</p>
+
+<h2 id="OPTIONS">OPTIONS</h2>
+
+<dl>
+<dt><code>-h</code>, <code>--help</code></dt><dd>Show the help page and exit.</dd>
+<dt class="flush"><code>-n</code></dt><dd>Dry run. Show executed commands but don't run them.</dd>
+<dt class="flush"><code>-q</code></dt><dd>Be quiet. Do not print any message (but log them to the logfile).</dd>
+<dt><code>-v</code>, <code>--version</code></dt><dd>Show version.</dd>
+</dl>
+
+
+<h2 id="COMMANDS">COMMANDS</h2>
+
+<dl>
+<dt class="flush"><code>update</code></dt><dd>Update the whole repository.</dd>
+<dt><code>update package</code></dt><dd>Force update of the specified package</dd>
+<dt><code>add package [mode]</code></dt><dd>Add new package to the list, 'mode' is the same as
+in the config file and defaults to 'm'.</dd>
+<dt><code>addbuild package [mode]</code></dt><dd>Same as above plus building the package right away.</dd>
+<dt><code>remove package</code></dt><dd>Remove package from repository and delete all source files.</dd>
+<dt class="flush"><code>info</code></dt><dd>Show some info about the repository.</dd>
+<dt class="flush"><code>list</code></dt><dd>List all current packages in the repository database.</dd>
+</dl>
+
+
+<h2 id="FOLDER-STRUCTURE">FOLDER STRUCTURE</h2>
+
+<p><code>aur-repo</code> needs just two folders for its work.
+By default these are <em>/build</em> and <em>/packages</em>.</p>
+
+<p>The build directory holds the config file (see <a href="#CONFIGURATION-FILE" title="CONFIGURATION FILE" data-bare-link="true">CONFIGURATION FILE</a>), a log file and the build folders of each package.</p>
+
+<p>The package directory holds the repository database as well as the binary packages. If you want to use the repository you need to serve this directory over <em>http</em>.</p>
+
+<p>Both directories can be overriden by an environment variable.</p>
+
+<p><code>BUILDDIR</code> defaults to <em>/build</em>, <code>PACKAGEDIR</code> defaults to <em>/packages</em>.</p>
+
+<h2 id="CONFIGURATION-FILE">CONFIGURATION FILE</h2>
+
+<p>The <code>aur-repo</code> looks for a file called <em>repo.conf</em> located in the <code>BUILDDIR</code>.
+The default <code>BUILDDIR</code> is <em>/build</em>. You can overwrite this with an environment variable.</p>
+
+<p>The file format is as easy as:</p>
+
+<pre><code>REPONAME=my-repo
+GET_FROM_AUR=(
+  package1=a
+  package2=m
+  package3=n
+)
+</code></pre>
+
+<p>The available modes for each package are:</p>
+
+<dl>
+<dt class="flush"><code>a</code></dt><dd>Always build a new package.</dd>
+<dt class="flush"><code>m</code></dt><dd>Only build a new package if the PKGBUILD in AUR changed.</dd>
+<dt class="flush"><code>n</code></dt><dd>Ignore package (useful if the package at AUR is currently broken or not in the AUR at all.).</dd>
+</dl>
+
+
+<h2 id="BUGS">BUGS</h2>
+
+<p><code>aur-repo</code> is written in bash. There may be some bugs inside. If you find one, report it to <a href="https://github.com/badboy/aur-repo/issues" data-bare-link="true">https://github.com/badboy/aur-repo/issues</a></p>
+
+<h2 id="COPYRIGHT">COPYRIGHT</h2>
+
+<p><code>aur-repo</code> is Copyright (C) 2011 Jan-Erik Rediger</p>
+
+<p>Based on work by Thorsten Toepper, who initially created aur-repo.
+Thorsten's version was inspired and partly based on work by
+Stefan Husmann and Michal Krenek</p>
+
+<h2 id="SEE-ALSO">SEE ALSO</h2>
+
+<p><span class="man-ref">repo-add<span class="s">(8)</span></span>, <span class="man-ref">repo-remove<span class="s">(8)</span></span>, <span class="man-ref">makepkg<span class="s">(8)</span></span>, <span class="man-ref">vercmp<span class="s">(8)</span></span></p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'>aur-repo v1.0.0</li>
+    <li class='tc'>August 2011</li>
+    <li class='tr'>aur-repo(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>

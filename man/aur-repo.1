@@ -1,0 +1,124 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "AUR\-REPO" "1" "August 2011" "aur-repo v1.0.0" "aur-repo Manual"
+.
+.SH "NAME"
+\fBaur\-repo\fR \- keep your local repository up to date\.
+.
+.SH "SYNOPSIS"
+\fBaur\-repo\fR [\-hnqv] [command]
+.
+.SH "DESCRIPTIONS"
+\fBaur\-repo\fR provides an easy way to keep a custom repository filled with AUR packages up to date\. All you need to do is to specifiy the packages in a simple text file and let \fBaur\-repo\fR do its work\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Show the help page and exit\.
+.
+.TP
+\fB\-n\fR
+Dry run\. Show executed commands but don\'t run them\.
+.
+.TP
+\fB\-q\fR
+Be quiet\. Do not print any message (but log them to the logfile)\.
+.
+.TP
+\fB\-v\fR, \fB\-\-version\fR
+Show version\.
+.
+.SH "COMMANDS"
+.
+.TP
+\fBupdate\fR
+Update the whole repository\.
+.
+.TP
+\fBupdate package\fR
+Force update of the specified package
+.
+.TP
+\fBadd package [mode]\fR
+Add new package to the list, \'mode\' is the same as in the config file and defaults to \'m\'\.
+.
+.TP
+\fBaddbuild package [mode]\fR
+Same as above plus building the package right away\.
+.
+.TP
+\fBremove package\fR
+Remove package from repository and delete all source files\.
+.
+.TP
+\fBinfo\fR
+Show some info about the repository\.
+.
+.TP
+\fBlist\fR
+List all current packages in the repository database\.
+.
+.SH "FOLDER STRUCTURE"
+\fBaur\-repo\fR needs just two folders for its work\. By default these are \fI/build\fR and \fI/packages\fR\.
+.
+.P
+The build directory holds the config file (see \fICONFIGURATION FILE\fR), a log file and the build folders of each package\.
+.
+.P
+The package directory holds the repository database as well as the binary packages\. If you want to use the repository you need to serve this directory over \fIhttp\fR\.
+.
+.P
+Both directories can be overriden by an environment variable\.
+.
+.P
+\fBBUILDDIR\fR defaults to \fI/build\fR, \fBPACKAGEDIR\fR defaults to \fI/packages\fR\.
+.
+.SH "CONFIGURATION FILE"
+The \fBaur\-repo\fR looks for a file called \fIrepo\.conf\fR located in the \fBBUILDDIR\fR\. The default \fBBUILDDIR\fR is \fI/build\fR\. You can overwrite this with an environment variable\.
+.
+.P
+The file format is as easy as:
+.
+.IP "" 4
+.
+.nf
+
+REPONAME=my\-repo
+GET_FROM_AUR=(
+  package1=a
+  package2=m
+  package3=n
+)
+.
+.fi
+.
+.IP "" 0
+.
+.P
+The available modes for each package are:
+.
+.TP
+\fBa\fR
+Always build a new package\.
+.
+.TP
+\fBm\fR
+Only build a new package if the PKGBUILD in AUR changed\.
+.
+.TP
+\fBn\fR
+Ignore package (useful if the package at AUR is currently broken or not in the AUR at all\.)\.
+.
+.SH "BUGS"
+\fBaur\-repo\fR is written in bash\. There may be some bugs inside\. If you find one, report it to \fIhttps://github\.com/badboy/aur\-repo/issues\fR
+.
+.SH "COPYRIGHT"
+\fBaur\-repo\fR is Copyright (C) 2011 Jan\-Erik Rediger
+.
+.P
+Based on work by Thorsten Toepper, who initially created aur\-repo\. Thorsten\'s version was inspired and partly based on work by Stefan Husmann and Michal Krenek
+.
+.SH "SEE ALSO"
+repo\-add(8), repo\-remove(8), makepkg(8), vercmp(8)

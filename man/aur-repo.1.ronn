@@ -1,0 +1,93 @@
+aur-repo(1) -- keep your local repository up to date.
+=====================================================
+
+## SYNOPSIS
+
+`aur-repo` [-hnqv] [command]
+
+## DESCRIPTIONS
+
+`aur-repo` provides an easy way to keep a custom repository filled with AUR packages up to date.
+ All you need to do is to specifiy the packages in a simple text file and let `aur-repo` do its work.
+
+## OPTIONS
+
+  * `-h`, `--help`:
+    Show the help page and exit.
+  * `-n`:
+    Dry run. Show executed commands but don't run them.
+  * `-q`:
+    Be quiet. Do not print any message (but log them to the logfile).
+  * `-v`, `--version`:
+    Show version.
+
+## COMMANDS
+
+  * `update`:
+    Update the whole repository.
+  * `update package`:
+    Force update of the specified package
+  * `add package [mode]`:
+    Add new package to the list, 'mode' is the same as
+    in the config file and defaults to 'm'.
+  * `addbuild package [mode]`:
+    Same as above plus building the package right away.
+  * `remove package`:
+    Remove package from repository and delete all source files.
+  * `info`:
+    Show some info about the repository.
+  * `list`:
+    List all current packages in the repository database.
+
+## FOLDER STRUCTURE
+
+`aur-repo` needs just two folders for its work.
+By default these are */build* and */packages*.
+
+The build directory holds the config file (see [CONFIGURATION FILE][]), a log file and the build folders of each package.
+
+The package directory holds the repository database as well as the binary packages. If you want to use the repository you need to serve this directory over *http*.
+
+Both directories can be overriden by an environment variable.
+
+`BUILDDIR` defaults to */build*, `PACKAGEDIR` defaults to */packages*.
+
+
+## CONFIGURATION FILE
+
+The `aur-repo` looks for a file called *repo.conf* located in the `BUILDDIR`.
+The default `BUILDDIR` is */build*. You can overwrite this with an environment variable.
+
+The file format is as easy as:
+    REPONAME=my-repo
+    GET_FROM_AUR=(
+      package1=a
+      package2=m
+      package3=n
+    )
+
+The available modes for each package are:
+
+  * `a`:
+    Always build a new package.
+  * `m`:
+    Only build a new package if the PKGBUILD in AUR changed.
+  * `n`:
+    Ignore package (useful if the package at AUR is currently broken or not in the AUR at all.).
+
+
+## BUGS
+
+`aur-repo` is written in bash. There may be some bugs inside. If you find one, report it to <https://github.com/badboy/aur-repo/issues>
+
+## COPYRIGHT
+
+`aur-repo` is Copyright (C) 2011 Jan-Erik Rediger
+
+Based on work by Thorsten Toepper, who initially created aur-repo.
+Thorsten's version was inspired and partly based on work by
+Stefan Husmann and Michal Krenek
+
+## SEE ALSO
+
+repo-add(8), repo-remove(8), makepkg(8), vercmp(8) 
