@@ -12,7 +12,7 @@ task :pages => :man do
   puts 'Rebuilding pages ...'
   verbose(false) {
     rm_rf 'pages'
-    push_url = `git remote show origin`.grep(/Push.*URL/).first[/git@.*/]
+    push_url = `git remote show origin`.scan(/Push.*URL.*/).first[/git@.*/]
     sh "
       set -e
       git fetch -q origin
