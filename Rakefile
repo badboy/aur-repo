@@ -1,3 +1,5 @@
+task :default => :man
+
 desc 'Build the manual'
 task :man do
   require 'ronn'
