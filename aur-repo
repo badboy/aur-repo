@@ -2,7 +2,7 @@
 # aur-repo - keep your local repo with packages from AUR up to date
 # Version : 1.0.0
 # Author  : Jan-Erik Rediger (badboy_) <badboy at archlinux dot us>
-# URL     : https://github.com/badboy/aur-repo/tree/ctdo
+# URL     : https://github.com/badboy/aur-repo
 #
 #        Based on work by Thorsten Toepper, who initially created aur-repo.
 #        Thorsten's version was inspired and partly based on work by
