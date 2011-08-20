@@ -29,7 +29,7 @@ aur-repo(1) -- keep your local repository up to date.
     Force update of the specified package
   * `add package [mode]`:
     Add new package to the list, 'mode' is the same as
-    in the config file and defaults to 'm'.
+    in the config file and defaults to *m*.
   * `addbuild package [mode]`:
     Same as above plus building the package right away.
   * `remove package`:
@@ -59,6 +59,7 @@ The `aur-repo` looks for a file called *repo.conf* located in the `BUILDDIR`.
 The default `BUILDDIR` is */build*. You can overwrite this with an environment variable.
 
 The file format is as easy as:
+
     REPONAME=my-repo
     GET_FROM_AUR=(
       package1=a
@@ -73,12 +74,124 @@ The available modes for each package are:
   * `m`:
     Only build a new package if the PKGBUILD in AUR changed.
   * `n`:
-    Ignore package (useful if the package at AUR is currently broken or not in the AUR at all.).
+    Ignore package (useful if the package at AUR is currently broken or not in the AUR at all).
+
+
+## EXAMPLES
+
+To initially setup your own repository with self-built packages, create a build directory as well as the directory for the binary packages.
+
+By default `aur-repo` uses */build* and */packages*, so to create this, execute:
+
+    mkdir /build
+    mkdir /packages
+
+Of course your free to put your directories whereever you want, just let `aur-repo` know where to look.
+So if you decide to have the repo somewhere else execute something along the following lines:
+
+    mkdir /home/uses/repo
+    mkdir /home/user/repo/build
+    mkdir /home/user/repo/packages
+    export BUILDDIR=/home/user/repo/build
+    export PACKAGEDIR=/home/user/repo/packages
+
+Now you must tell `aur-repo` somehow which packages it should build.
+Start by creating a simple configuration file (for complete syntax see [CONFIGURATION FILE], even though there are no more extras):
+
+    cat <<EOF > /build/repo.conf
+    REPONAME=myrepo
+    GET_FROM_AUR=(
+        aur-repo=m
+    )
+    EOF
+
+Each package should be listed on its own line and consists of the name and a mode.
+`aur-repo` knows of 3 modes:
+`m` is the default and `aur-repo` will check the current version against a newly downloaded PKGBUILD and only build if the PKGBUILD changed.
+`a` tells `aur-repo` to always rebuild the package on each update cycle.
+`n` can be used if the PKGBUILD in the AUR is broken, you need to keep a specific version of the package or it is not in the AUR at all. `aur-repo` will ignore these packages on build cycles.
+
+Now that you got your directory structure and a configuration file ready to go, just type:
+
+    aur-repo update
+
+The script will take your configuration and perform all necessary steps to finally produce binary packages and your repository database.
+
+If a package cannot be build because of errors the script continues with the next package. See the terminal output for errors (which are not logged [yet?] if produced by `makepkg`).
+
+If you want to add new packages to your configuration use
+
+    aur-repo add package
+
+where `package` is the name of the new package.
+
+To directly add and build a new package use:
+
+    aur-repo addbuild package
+
+If you need to update or force a rebuild of a package use
+
+    aur-repo update package
+
+When executed this way `aur-repo` will ignore the configured mode.
+
+When you got a package on your list you no longer want to be built or kept in your repo remove it:
+
+    aur-repo remove package
+
+This will remove all sources and binaries as well as the database entry.
+
+If a package cannot be build because of missing dependencies, you can pass extra arguments to makepkg with the environment variable `EXTRA_MAKEPKG_ARGS`.
+A default use case for this could be to install and remove dependencies as needed:
+
+    EXTRA_MAKEPKG_ARGS="-sr" aur-repo update
+
+(I plan to make this configurable.)
+
+Now that you got your packages built, to actually use them across your computers you have to add the repository to pacman's configuration.
+
+First make sure that the packages directory is accesable some way. Either setup a http server or serve it via ftp. If the repo is on the same machine the packages are for or the hard drive can be mounted over the network, you can also safely use absolute *file://*-URIs.
+
+Add one of the following lines to your */etc/pacman.conf* (of course the repo name in brackets is mandatory):
+
+    [myrepo]
+    http://example.com/path/to/packages
+    ftp://example.com/path/to/packages
+    file://home/user/repo/packages
+
+You are ready to install packages from your very own repository now. Update pacman's database to pickup the new repository:
+
+     pacman -Su
+
+... and install packages:
+
+    pacman -S my-self-built-package
+
+That's it.
+
+## IMPROVEMENTS
+
+`aur-repo` is never fully finished. If you got some improvements or requests just tell me so at <https://github.com/badboy/aur-repo/issues>.
+
+Next things I like to implement:
+
+  * A proper PKGBUILD for `aur-repo` itself, so others can use it as easily as
+    possible (and to update itself).
+  * global lock, the same way pacman does. So that concurrently executed
+    `aur-repo` instances don't interfer with each other.
+  * A user to build all packages with.
+    Currently the script is in use on a big build server accessed by several
+    different users and it sometimes gets buggy when files do not belong
+    to the currenct user and therefore cannot be deleted.
+  * Some statistics about packages, build times and so on.
+    We got build servers for both architectures (x86_64 & i686) and
+    the idea came up to have an overview over which packages are available
+    on which machine.
 
 
 ## BUGS
 
-`aur-repo` is written in bash. There may be some bugs inside. If you find one, report it to <https://github.com/badboy/aur-repo/issues>
+`aur-repo` is written in bash. There may be some bugs inside. If you find one, report it to <https://github.com/badboy/aur-repo/issues>.
 
 ## COPYRIGHT
 
@@ -86,8 +199,8 @@ The available modes for each package are:
 
 Based on work by Thorsten Toepper, who initially created aur-repo.
 Thorsten's version was inspired and partly based on work by
-Stefan Husmann and Michal Krenek
+Stefan Husmann and Michal Krenek.
 
 ## SEE ALSO
 
-repo-add(8), repo-remove(8), makepkg(8), vercmp(8) 
+pacman(8), makepkg(8), repo-add(8), repo-remove(8), vercmp(8)

@@ -42,7 +42,7 @@ Force update of the specified package
 .
 .TP
 \fBadd package [mode]\fR
-Add new package to the list, \'mode\' is the same as in the config file and defaults to \'m\'\.
+Add new package to the list, \'mode\' is the same as in the config file and defaults to \fIm\fR\.
 .
 .TP
 \fBaddbuild package [mode]\fR
@@ -109,16 +109,238 @@ Only build a new package if the PKGBUILD in AUR changed\.
 .
 .TP
 \fBn\fR
-Ignore package (useful if the package at AUR is currently broken or not in the AUR at all\.)\.
+Ignore package (useful if the package at AUR is currently broken or not in the AUR at all)\.
+.
+.SH "EXAMPLES"
+To initially setup your own repository with self\-built packages, create a build directory as well as the directory for the binary packages\.
+.
+.P
+By default \fBaur\-repo\fR uses \fI/build\fR and \fI/packages\fR, so to create this, execute:
+.
+.IP "" 4
+.
+.nf
+
+mkdir /build
+mkdir /packages
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Of course your free to put your directories whereever you want, just let \fBaur\-repo\fR know where to look\. So if you decide to have the repo somewhere else execute something along the following lines:
+.
+.IP "" 4
+.
+.nf
+
+mkdir /home/uses/repo
+mkdir /home/user/repo/build
+mkdir /home/user/repo/packages
+export BUILDDIR=/home/user/repo/build
+export PACKAGEDIR=/home/user/repo/packages
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Now you must tell \fBaur\-repo\fR somehow which packages it should build\. Start by creating a simple configuration file (for complete syntax see \fICONFIGURATION FILE\fR, even though there are no more extras):
+.
+.IP "" 4
+.
+.nf
+
+cat <<EOF > /build/repo\.conf
+REPONAME=myrepo
+GET_FROM_AUR=(
+    aur\-repo=m
+)
+EOF
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Each package should be listed on its own line and consists of the name and a mode\. \fBaur\-repo\fR knows of 3 modes: \fBm\fR is the default and \fBaur\-repo\fR will check the current version against a newly downloaded PKGBUILD and only build if the PKGBUILD changed\. \fBa\fR tells \fBaur\-repo\fR to always rebuild the package on each update cycle\. \fBn\fR can be used if the PKGBUILD in the AUR is broken, you need to keep a specific version of the package or it is not in the AUR at all\. \fBaur\-repo\fR will ignore these packages on build cycles\.
+.
+.P
+Now that you got your directory structure and a configuration file ready to go, just type:
+.
+.IP "" 4
+.
+.nf
+
+aur\-repo update
+.
+.fi
+.
+.IP "" 0
+.
+.P
+The script will take your configuration and perform all necessary steps to finally produce binary packages and your repository database\.
+.
+.P
+If a package cannot be build because of errors the script continues with the next package\. See the terminal output for errors (which are not logged [yet?] if produced by \fBmakepkg\fR)\.
+.
+.P
+If you want to add new packages to your configuration use
+.
+.IP "" 4
+.
+.nf
+
+aur\-repo add package
+.
+.fi
+.
+.IP "" 0
+.
+.P
+where \fBpackage\fR is the name of the new package\.
+.
+.P
+To directly add and build a new package use:
+.
+.IP "" 4
+.
+.nf
+
+aur\-repo addbuild package
+.
+.fi
+.
+.IP "" 0
+.
+.P
+If you need to update or force a rebuild of a package use
+.
+.IP "" 4
+.
+.nf
+
+aur\-repo update package
+.
+.fi
+.
+.IP "" 0
+.
+.P
+When executed this way \fBaur\-repo\fR will ignore the configured mode\.
+.
+.P
+When you got a package on your list you no longer want to be built or kept in your repo remove it:
+.
+.IP "" 4
+.
+.nf
+
+aur\-repo remove package
+.
+.fi
+.
+.IP "" 0
+.
+.P
+This will remove all sources and binaries as well as the database entry\.
+.
+.P
+If a package cannot be build because of missing dependencies, you can pass extra arguments to makepkg with the environment variable \fBEXTRA_MAKEPKG_ARGS\fR\. A default use case for this could be to install and remove dependencies as needed:
+.
+.IP "" 4
+.
+.nf
+
+EXTRA_MAKEPKG_ARGS="\-sr" aur\-repo update
+.
+.fi
+.
+.IP "" 0
+.
+.P
+(I plan to make this configurable\.)
+.
+.P
+Now that you got your packages built, to actually use them across your computers you have to add the repository to pacman\'s configuration\.
+.
+.P
+First make sure that the packages directory is accesable some way\. Either setup a http server or serve it via ftp\. If the repo is on the same machine the packages are for or the hard drive can be mounted over the network, you can also safely use absolute \fIfile://\fR\-URIs\.
+.
+.P
+Add one of the following lines to your \fI/etc/pacman\.conf\fR (of course the repo name in brackets is mandatory):
+.
+.IP "" 4
+.
+.nf
+
+[myrepo]
+http://example\.com/path/to/packages
+ftp://example\.com/path/to/packages
+file://home/user/repo/packages
+.
+.fi
+.
+.IP "" 0
+.
+.P
+You are ready to install packages from your very own repository now\. Update pacman\'s database to pickup the new repository:
+.
+.IP "" 4
+.
+.nf
+
+ pacman \-Su
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\&\.\.\. and install packages:
+.
+.IP "" 4
+.
+.nf
+
+pacman \-S my\-self\-built\-package
+.
+.fi
+.
+.IP "" 0
+.
+.P
+That\'s it\.
+.
+.SH "IMPROVEMENTS"
+\fBaur\-repo\fR is never fully finished\. If you got some improvements or requests just tell me so at \fIhttps://github\.com/badboy/aur\-repo/issues\fR\.
+.
+.P
+Next things I like to implement:
+.
+.IP "\(bu" 4
+A proper PKGBUILD for \fBaur\-repo\fR itself, so others can use it as easily as possible (and to update itself)\.
+.
+.IP "\(bu" 4
+global lock, the same way pacman does\. So that concurrently executed \fBaur\-repo\fR instances don\'t interfer with each other\.
+.
+.IP "\(bu" 4
+A user to build all packages with\. Currently the script is in use on a big build server accessed by several different users and it sometimes gets buggy when files do not belong to the currenct user and therefore cannot be deleted\.
+.
+.IP "\(bu" 4
+Some statistics about packages, build times and so on\. We got build servers for both architectures (x86_64 & i686) and the idea came up to have an overview over which packages are available on which machine\.
+.
+.IP "" 0
 .
 .SH "BUGS"
-\fBaur\-repo\fR is written in bash\. There may be some bugs inside\. If you find one, report it to \fIhttps://github\.com/badboy/aur\-repo/issues\fR
+\fBaur\-repo\fR is written in bash\. There may be some bugs inside\. If you find one, report it to \fIhttps://github\.com/badboy/aur\-repo/issues\fR\.
 .
 .SH "COPYRIGHT"
 \fBaur\-repo\fR is Copyright (C) 2011 Jan\-Erik Rediger
 .
 .P
-Based on work by Thorsten Toepper, who initially created aur\-repo\. Thorsten\'s version was inspired and partly based on work by Stefan Husmann and Michal Krenek
+Based on work by Thorsten Toepper, who initially created aur\-repo\. Thorsten\'s version was inspired and partly based on work by Stefan Husmann and Michal Krenek\.
 .
 .SH "SEE ALSO"
-repo\-add(8), repo\-remove(8), makepkg(8), vercmp(8)
+pacman(8), makepkg(8), repo\-add(8), repo\-remove(8), vercmp(8)
