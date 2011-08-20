@@ -66,6 +66,8 @@
     <a href="#COMMANDS">COMMANDS</a>
     <a href="#FOLDER-STRUCTURE">FOLDER STRUCTURE</a>
     <a href="#CONFIGURATION-FILE">CONFIGURATION FILE</a>
+    <a href="#EXAMPLES">EXAMPLES</a>
+    <a href="#IMPROVEMENTS">IMPROVEMENTS</a>
     <a href="#BUGS">BUGS</a>
     <a href="#COPYRIGHT">COPYRIGHT</a>
     <a href="#SEE-ALSO">SEE ALSO</a>
@@ -107,7 +109,7 @@
 <dt class="flush"><code>update</code></dt><dd>Update the whole repository.</dd>
 <dt><code>update package</code></dt><dd>Force update of the specified package</dd>
 <dt><code>add package [mode]</code></dt><dd>Add new package to the list, 'mode' is the same as
-in the config file and defaults to 'm'.</dd>
+in the config file and defaults to <em>m</em>.</dd>
 <dt><code>addbuild package [mode]</code></dt><dd>Same as above plus building the package right away.</dd>
 <dt><code>remove package</code></dt><dd>Remove package from repository and delete all source files.</dd>
 <dt class="flush"><code>info</code></dt><dd>Show some info about the repository.</dd>
@@ -148,13 +150,139 @@ GET_FROM_AUR=(
 <dl>
 <dt class="flush"><code>a</code></dt><dd>Always build a new package.</dd>
 <dt class="flush"><code>m</code></dt><dd>Only build a new package if the PKGBUILD in AUR changed.</dd>
-<dt class="flush"><code>n</code></dt><dd>Ignore package (useful if the package at AUR is currently broken or not in the AUR at all.).</dd>
+<dt class="flush"><code>n</code></dt><dd>Ignore package (useful if the package at AUR is currently broken or not in the AUR at all).</dd>
 </dl>
+
+
+<h2 id="EXAMPLES">EXAMPLES</h2>
+
+<p>To initially setup your own repository with self-built packages, create a build directory as well as the directory for the binary packages.</p>
+
+<p>By default <code>aur-repo</code> uses <em>/build</em> and <em>/packages</em>, so to create this, execute:</p>
+
+<pre><code>mkdir /build
+mkdir /packages
+</code></pre>
+
+<p>Of course your free to put your directories whereever you want, just let <code>aur-repo</code> know where to look.
+So if you decide to have the repo somewhere else execute something along the following lines:</p>
+
+<pre><code>mkdir /home/uses/repo
+mkdir /home/user/repo/build
+mkdir /home/user/repo/packages
+export BUILDDIR=/home/user/repo/build
+export PACKAGEDIR=/home/user/repo/packages
+</code></pre>
+
+<p>Now you must tell <code>aur-repo</code> somehow which packages it should build.
+Start by creating a simple configuration file (for complete syntax see <a href="#CONFIGURATION-FILE" title="CONFIGURATION FILE" data-bare-link="true">CONFIGURATION FILE</a>, even though there are no more extras):</p>
+
+<pre><code>cat &lt;&lt;EOF > /build/repo.conf
+REPONAME=myrepo
+GET_FROM_AUR=(
+    aur-repo=m
+)
+EOF
+</code></pre>
+
+<p>Each package should be listed on its own line and consists of the name and a mode.
+<code>aur-repo</code> knows of 3 modes:
+<code>m</code> is the default and <code>aur-repo</code> will check the current version against a newly downloaded PKGBUILD and only build if the PKGBUILD changed.
+<code>a</code> tells <code>aur-repo</code> to always rebuild the package on each update cycle.
+<code>n</code> can be used if the PKGBUILD in the AUR is broken, you need to keep a specific version of the package or it is not in the AUR at all. <code>aur-repo</code> will ignore these packages on build cycles.</p>
+
+<p>Now that you got your directory structure and a configuration file ready to go, just type:</p>
+
+<pre><code>aur-repo update
+</code></pre>
+
+<p>The script will take your configuration and perform all necessary steps to finally produce binary packages and your repository database.</p>
+
+<p>If a package cannot be build because of errors the script continues with the next package. See the terminal output for errors (which are not logged [yet?] if produced by <code>makepkg</code>).</p>
+
+<p>If you want to add new packages to your configuration use</p>
+
+<pre><code>aur-repo add package
+</code></pre>
+
+<p>where <code>package</code> is the name of the new package.</p>
+
+<p>To directly add and build a new package use:</p>
+
+<pre><code>aur-repo addbuild package
+</code></pre>
+
+<p>If you need to update or force a rebuild of a package use</p>
+
+<pre><code>aur-repo update package
+</code></pre>
+
+<p>When executed this way <code>aur-repo</code> will ignore the configured mode.</p>
+
+<p>When you got a package on your list you no longer want to be built or kept in your repo remove it:</p>
+
+<pre><code>aur-repo remove package
+</code></pre>
+
+<p>This will remove all sources and binaries as well as the database entry.</p>
+
+<p>If a package cannot be build because of missing dependencies, you can pass extra arguments to makepkg with the environment variable <code>EXTRA_MAKEPKG_ARGS</code>.
+A default use case for this could be to install and remove dependencies as needed:</p>
+
+<pre><code>EXTRA_MAKEPKG_ARGS="-sr" aur-repo update
+</code></pre>
+
+<p>(I plan to make this configurable.)</p>
+
+<p>Now that you got your packages built, to actually use them across your computers you have to add the repository to pacman's configuration.</p>
+
+<p>First make sure that the packages directory is accesable some way. Either setup a http server or serve it via ftp. If the repo is on the same machine the packages are for or the hard drive can be mounted over the network, you can also safely use absolute <em>file://</em>-URIs.</p>
+
+<p>Add one of the following lines to your <em>/etc/pacman.conf</em> (of course the repo name in brackets is mandatory):</p>
+
+<pre><code>[myrepo]
+http://example.com/path/to/packages
+ftp://example.com/path/to/packages
+file://home/user/repo/packages
+</code></pre>
+
+<p>You are ready to install packages from your very own repository now. Update pacman's database to pickup the new repository:</p>
+
+<pre><code> pacman -Su
+</code></pre>
+
+<p>... and install packages:</p>
+
+<pre><code>pacman -S my-self-built-package
+</code></pre>
+
+<p>That's it.</p>
+
+<h2 id="IMPROVEMENTS">IMPROVEMENTS</h2>
+
+<p><code>aur-repo</code> is never fully finished. If you got some improvements or requests just tell me so at <a href="https://github.com/badboy/aur-repo/issues" data-bare-link="true">https://github.com/badboy/aur-repo/issues</a>.</p>
+
+<p>Next things I like to implement:</p>
+
+<ul>
+<li>A proper PKGBUILD for <code>aur-repo</code> itself, so others can use it as easily as
+possible (and to update itself).</li>
+<li>global lock, the same way pacman does. So that concurrently executed
+<code>aur-repo</code> instances don't interfer with each other.</li>
+<li>A user to build all packages with.
+Currently the script is in use on a big build server accessed by several
+different users and it sometimes gets buggy when files do not belong
+to the currenct user and therefore cannot be deleted.</li>
+<li>Some statistics about packages, build times and so on.
+We got build servers for both architectures (x86_64 &amp; i686) and
+the idea came up to have an overview over which packages are available
+on which machine.</li>
+</ul>
 
 
 <h2 id="BUGS">BUGS</h2>
 
-<p><code>aur-repo</code> is written in bash. There may be some bugs inside. If you find one, report it to <a href="https://github.com/badboy/aur-repo/issues" data-bare-link="true">https://github.com/badboy/aur-repo/issues</a></p>
+<p><code>aur-repo</code> is written in bash. There may be some bugs inside. If you find one, report it to <a href="https://github.com/badboy/aur-repo/issues" data-bare-link="true">https://github.com/badboy/aur-repo/issues</a>.</p>
 
 <h2 id="COPYRIGHT">COPYRIGHT</h2>
 
@@ -162,11 +290,11 @@ GET_FROM_AUR=(
 
 <p>Based on work by Thorsten Toepper, who initially created aur-repo.
 Thorsten's version was inspired and partly based on work by
-Stefan Husmann and Michal Krenek</p>
+Stefan Husmann and Michal Krenek.</p>
 
 <h2 id="SEE-ALSO">SEE ALSO</h2>
 
-<p><span class="man-ref">repo-add<span class="s">(8)</span></span>, <span class="man-ref">repo-remove<span class="s">(8)</span></span>, <span class="man-ref">makepkg<span class="s">(8)</span></span>, <span class="man-ref">vercmp<span class="s">(8)</span></span></p>
+<p><span class="man-ref">pacman<span class="s">(8)</span></span>, <span class="man-ref">makepkg<span class="s">(8)</span></span>, <span class="man-ref">repo-add<span class="s">(8)</span></span>, <span class="man-ref">repo-remove<span class="s">(8)</span></span>, <span class="man-ref">vercmp<span class="s">(8)</span></span></p>
 
 
   <ol class='man-decor man-foot man foot'>
