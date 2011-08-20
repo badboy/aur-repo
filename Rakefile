@@ -32,15 +32,25 @@ task :pages => :man do
 end
 
 desc 'Install aur-repo and man pages'
-task :install => :man do
+task :install do
   prefix = ENV['PREFIX'] || '/usr/local'
 
   man_dir = File.join(prefix, 'man', 'man1')
   bin_dir = File.join(prefix, 'bin')
 
-  mkdir_p bin_dir
-  mkdir_p man_dir
-  cp './aur-repo', bin_dir
-  chmod 0755, File.join(bin_dir, 'aur-repo')
-  cp './man/aur-repo.1', man_dir
+  verbose(true) {
+    mkdir_p bin_dir
+    mkdir_p man_dir
+    cp './aur-repo', bin_dir
+    chmod 0755, File.join(bin_dir, 'aur-repo')
+    cp './man/aur-repo.1', man_dir
+  }
+end
+
+namespace :install do
+  desc 'Build man pages and then install everything.'
+  task :man do
+    Rake::Task['man'].invoke
+    Rake::Task['install'].invoke
+  end
 end
