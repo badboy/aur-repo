@@ -4,6 +4,8 @@ This Script is written for ArchLinux systems which provide a repository
 solely containing software from the AUR. The task is to maintain a given
 set of packages from the AUR and keep them up to date in the local repo.
 
+Please see the [man page][man] for detailed information about `aur-repo`.
+
 ## Usage
 
 ```
@@ -38,3 +40,5 @@ a ... build always a new package
 m ... only build a new package if the PKGBUILD in AUR changed
 n ... ignore package (useful if the package at AUR is currently broken)
 ```
+
+[man]: http://badboy.github.com/aur-repo
