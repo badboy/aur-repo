@@ -52,6 +52,8 @@ Both directories can be overriden by an environment variable.
 
 `BUILDDIR` defaults to */build*, `PACKAGEDIR` defaults to */packages*.
 
+The configuration file must be placed inside the `PACKAGEDIR` and called *repo.conf*.
+
 
 ## CONFIGURATION FILE
 
