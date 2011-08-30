@@ -400,6 +400,13 @@ show_info() {
     echo "No. of packages : ${#GET_FROM_AUR[@]}"
 }
 
+if [ $(id -u) -eq 0 ]; then
+    echo "Do NOT run $(basename ${0}) as root!" >&2
+    echo "It WILL damage everything." >&2
+    echo "Your repository, your file system, your kernel. Everything will be gone." >&2
+    exit 127
+fi
+
 if [ "${1}" = "-n" ]; then
     DRY_RUN=1
     log "---> DRYRUN!"
