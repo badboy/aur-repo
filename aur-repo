@@ -437,7 +437,7 @@ if [ "${1}" = "-q" ]; then
     shift
 fi
 
-if [ "${1}" = "-v" -a "${QUIET}" -ne 1 ]; then
+if [ "${1}" = "-V" -a "${QUIET}" -ne 1 ]; then
     VVERBOSE=1
     shift
 fi
