@@ -143,7 +143,7 @@ build() {
                 log "(${PACKAGE}) Package build failed...skipping"
                 REBUILD=0
             fi
-            find . -iname "*${PKGEXT}" -exec cp {} "${PACKAGEDIR}/" \;
+            find . -iname "${PACKAGE}-*${PKGEXT}" -exec cp {} "${PACKAGEDIR}/" \;
         else
             log "(${PACKAGE}) Package not found...skipping"
             REBUILD=0
