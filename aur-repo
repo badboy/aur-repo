@@ -23,20 +23,25 @@ DRY_RUN=0
 QUIET=0
 VVERBOSE=0
 
+# Log messages to $LOGFILE.
 log() {
     [ ${QUIET} -eq 0 ] && echo $@
     [ ${DRY_RUN} -eq 0 ] && echo "[`date +'%Y-%m-%d %H:%M'`]: $@" >> "${LOGFILE}"
 }
 
+# Log messages when in verbose mode.
 vlog() {
     [ ${VVERBOSE} -eq 1 ] && echo "[v] $@"
 }
 
+# Log a message and exit with an error.
 die() {
     log $@
     exit 1
 }
 
+# Expand a given relative path to an absolute one.
+# Works only with directories.
 expand_path() {
     local cwd="$(pwd)"
     cd "$1"
@@ -44,6 +49,9 @@ expand_path() {
     cd "$cwd"
 }
 
+# Run given command on the shell.
+# If $DRY_RUN is set, it just logs the command.
+# If $VVERBOSE is set, it prints the executed command to stdout.
 shell_run() {
     if [ ${DRY_RUN} -eq 0 ]; then
         vlog "$@"
@@ -53,22 +61,26 @@ shell_run() {
     fi
 }
 
+# Remove a package from database if it exists in the $PACKAGEDIR.
 reporemove() {
     if [ -f "${PACKAGEDIR}/${REPONAME}${DBEXT}" ]; then
         shell_run repo-remove "${PACKAGEDIR}/${REPONAME}${DBEXT}" "${1}"
     fi
 }
 
+# Add a package to the database.
 repoadd() {
     shell_run repo-add "${PACKAGEDIR}/${REPONAME}${DBEXT}" "${1}"
 }
 
+# Remove a package from the database and the file system.
 remove_bin_package() {
     local package="${1}"
     reporemove "${package}"
-    shell_run find "${PACKAGEDIR}" -type f -name "${package}-*${PKGEXT}" -delete
+    shell_run find "${PACKAGEDIR}" -type f -name "${package}-"'*'"${PKGEXT}" -delete
 }
 
+# Download a given package to $BUILDDIR/.cache and unpack it.
 download() {
     wget -qO "${BUILDDIR}/.cache/${PACKAGE}.tar.gz" "${AURURL}/${PACKAGE}/${PACKAGE}.tar.gz"
     if [ $? -ne 0 ]; then
@@ -81,6 +93,7 @@ download() {
     return 0
 }
 
+# Get the pkgver from given file and remove quotes.
 get_pkgver() {
     if [ -f "${1}" ]; then
         grep "^pkgver=" "${1}" | cut -d'=' -f2 | sed "s#['\"]##g"
@@ -89,6 +102,7 @@ get_pkgver() {
     fi
 }
 
+# Get the pkgrel from given file and remove quotes.
 get_pkgrel() {
     if [ -f "${1}" ]; then
         grep "^pkgrel=" "${1}" | cut -d'=' -f2 | sed "s#['\"]##g"
@@ -97,6 +111,8 @@ get_pkgrel() {
     fi
 }
 
+# Diff the versions of a new PKGBUILD to the current one.
+# If versions differ, it sets $REBUILD to 1, otherwise to 0.
 diff_pkg() {
     local aurver=`get_pkgver "${BUILDDIR}/.cache/${PACKAGE}/PKGBUILD"`
     local aurrel=`get_pkgrel "${BUILDDIR}/.cache/${PACKAGE}/PKGBUILD"`
@@ -138,6 +154,10 @@ diff_pkg() {
     cd ${BUILDDIR}
 }
 
+# Build a given package using `makepkg`.
+# Respects the env variable $MAKEPKG_EXTRA_ARGS.
+#
+# Returns 1 on successfull build, 0 on error.
 build() {
     if [ "${1}" != "nodiff" ]; then
         diff_pkg
@@ -165,6 +185,8 @@ build() {
     return 1
 }
 
+# Parses a .PKGINFO for a given package, extracting pkgver and arch
+# to $PKGVER and $CARCH.
 get_data() {
     if [ -f "${BUILDDIR}/${PACKAGE}/pkg/.PKGINFO" ]; then
         # " =" to avoid misuse using the url tag.
@@ -176,6 +198,7 @@ get_data() {
     fi
 }
 
+# Print the help message to stdout.
 show_help() {
 cat << EOF
 Usage: $(basename ${0}) [-hnqv] [command]
@@ -211,6 +234,7 @@ n ... ignore package (useful if the package at AUR is currently broken)
 EOF
 }
 
+# Print the version to stdout.
 show_version() {
     cat <<EOF
 $(basename ${0}) v${VERSION} © 2011 Jan-Erik Rediger
@@ -218,6 +242,10 @@ $(basename ${0}) v${VERSION} © 2011 Jan-Erik Rediger
 EOF
 }
 
+# Setup the build environment.
+#
+# Checks for an existent $REPOCONF file and sources it.
+# Sources `/etc/makepkg.conf` for $PKGEXT or sets it otherwise to ".pkg.tar.gz".
 setup() {
     # Check given path and show help
     if [ ! -f "${REPOCONF}" ]; then
@@ -249,6 +277,7 @@ setup() {
     fi
 }
 
+# Update just one package.
 update_one() {
     PACKAGE="${1}"
     BUILD_ONE=1
@@ -281,6 +310,7 @@ update_one() {
     log "---> update finished."
 }
 
+# Update all packages in database.
 update_all() {
     log "---> full update"
 
@@ -335,6 +365,8 @@ update_all() {
     log "---> full update finished."
 }
 
+# Add a package to the intern list of packages.
+# This does not build the package.
 add_package() {
     if [ -z "${1}" ]; then
         die "Please give a package name and optional a new mode."
@@ -374,6 +406,8 @@ add_package() {
 
 }
 
+# Remove a package from the list and removes the database entry and
+# the packages archive from filesystem.
 remove_package() {
     if [ -z "${1}" ]; then
         die "Please give a package name and optional a new mode."
@@ -402,6 +436,7 @@ remove_package() {
     log "---> Removed ${rm_package} from ${REPOCONF}"
 }
 
+# List all packages in database archive file.
 list_packages() {
     if [ -f "${PACKAGEDIR}/${REPONAME}${DBEXT}" ]; then
         tar -atf "${PACKAGEDIR}/${REPONAME}${DBEXT}" | sed 's#/.\+\?##' | uniq
@@ -410,6 +445,7 @@ list_packages() {
     fi
 }
 
+# Show info of database.
 show_info() {
     echo "Config          : ${REPOCONF}"
     echo "Logfile         : ${LOGFILE}"
@@ -419,6 +455,7 @@ show_info() {
     echo "No. of packages : ${#GET_FROM_AUR[@]}"
 }
 
+# Make sure this script does not run as root.
 if [ $(id -u) -eq 0 ]; then
     echo "Do NOT run $(basename ${0}) as root!" >&2
     echo "It WILL damage everything." >&2
@@ -426,23 +463,26 @@ if [ $(id -u) -eq 0 ]; then
     exit 127
 fi
 
+# Enable dry-run mode with `-n`.
 if [ "${1}" = "-n" ]; then
     DRY_RUN=1
     log "---> DRYRUN!"
     shift
 fi
 
+# Make aur-repo quiet again with `-q`.
 if [ "${1}" = "-q" ]; then
     QUIET=1
     shift
 fi
 
+# If not quiet yet, enable verbose mode with `-V`.
 if [ "${1}" = "-V" -a "${QUIET}" -ne 1 ]; then
     VVERBOSE=1
     shift
 fi
 
-
+# Perform action based on the given arguments.
 case "${1}" in
     add)
         setup "${1}"
