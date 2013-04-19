@@ -6,6 +6,10 @@ set of packages from the AUR and keep them up to date in the local repo.
 
 Please see the [man page][man] for detailed information about `aur-repo`.
 
+---
+Development has ceased completely!
+---
+
 ## Usage
 
 ```
